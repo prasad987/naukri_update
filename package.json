@@ -5,7 +5,8 @@
   "main": "naukri-profile-refresh.js",
   "scripts": {
     "refresh": "node naukri-profile-refresh.js",
-    "login": "node naukri-profile-refresh.js login"
+    "login": "node naukri-profile-refresh.js login",
+    "auto-apply": "node naukri-auto-apply.js"
   },
   "author": "Ankit Baghel",
   "license": "ISC",

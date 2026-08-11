@@ -60,5 +60,8 @@ const CV = {
 const CREDS = { email: g('GOOGLE_EMAIL') || g('EMAIL'), password: g('GOOGLE_PASSWORD') };
 const geminiKey = g('GEMINI_KEY');
 const naukriProfileUrl = g('NAUKRI_PROFILE_URL', 'https://www.naukri.com/mnjuser/profile');
+const rawResumePath = g('RESUME_PATH', 'resume.pdf');
+const resumePath = path.isAbsolute(rawResumePath) ? rawResumePath : path.resolve(__dirname, rawResumePath);
 
-module.exports = { CV, CREDS, geminiKey, naukriProfileUrl };
+module.exports = { CV, CREDS, geminiKey, naukriProfileUrl, resumePath };
+

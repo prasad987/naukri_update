@@ -12,7 +12,8 @@
 const { chromium } = require('playwright-core');
 const path = require('path');
 const fs = require('fs');
-const { CREDS, naukriProfileUrl } = require('./config'); // credentials + profile URL come from .env, never hard-coded
+const { CREDS, naukriProfileUrl, resumePath } = require('./config'); // credentials + profile URL come from .env, never hard-coded
+
 
 const PROFILE_URL = naukriProfileUrl;
 const LOGIN_URL = `https://www.naukri.com/nlogin/login?URL=${PROFILE_URL}`;
@@ -137,6 +138,29 @@ async function googleLogin(ctx, page) {
     }
 
     log(`OK: headline ${current.endsWith('.') ? 'dot removed' : 'dot added'} (verified) → "${updated.slice(0, 60)}"`);
+
+    // --- Resume Document File Upload ---
+    if (fs.existsSync(resumePath)) {
+      log(`Uploading resume file from "${path.basename(resumePath)}"...`);
+      const fileInput = page.locator('#attachCV, #lazyAttachCV input[type="file"]').first();
+      await fileInput.waitFor({ state: 'attached', timeout: 30000 });
+      await fileInput.setInputFiles(resumePath);
+
+      // Wait for upload network request to finish and UI to update
+      await page.waitForTimeout(5000);
+
+      const msgBox = page.locator('#attachCVMsgBox, .attachCV .status-msg, .attachCV .msg');
+      let statusText = '';
+      if (await msgBox.count() > 0) {
+        statusText = (await msgBox.innerText()).replace(/\s+/g, ' ').trim();
+      }
+
+
+      log(`OK: resume file uploaded ("${path.basename(resumePath)}") ${statusText ? `- ${statusText}` : ''}`);
+    } else {
+      log(`INFO: resume file upload skipped (file not found at "${resumePath}")`);
+    }
+
   } catch (err) {
     const pages = ctx.pages();
     for (let i = 0; i < pages.length; i++) {

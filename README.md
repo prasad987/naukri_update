@@ -1,8 +1,7 @@
 # Naukri Profile Refresh
 
 Keeps your Naukri profile "recently updated" — recruiters see fresh profiles first.
-Every run it toggles a trailing `.` on your **resume headline**, which counts as a
-profile update on Naukri. Schedule it hourly and forget about it.
+Every run it toggles a trailing `.` on your **resume headline** and automatically re-uploads your **resume document file** (PDF/DOCX), keeping your profile update timestamp fresh on Naukri. Schedule it hourly and forget about it.
 
 - Logs in automatically with your **Google account** (session is saved after the first login).
 - Runs in an off-screen Chrome window (Naukri blocks headless browsers).
@@ -39,8 +38,10 @@ Open `.env` and fill in at least:
 | `GOOGLE_EMAIL` | The Google account your Naukri profile uses |
 | `GOOGLE_PASSWORD` | Its password (used only for the automated sign-in) |
 | `NAUKRI_PROFILE_URL` | Your Naukri profile page — the default `https://www.naukri.com/mnjuser/profile` works for every account |
+| `RESUME_PATH` | Path to your resume file (e.g. `resume.pdf`) to auto-upload on each run |
 
 `.env` is git-ignored, so your credentials never get pushed.
+
 
 **3. First login (one time, visible browser):**
 
@@ -87,6 +88,27 @@ Enable-ScheduledTask NaukriProfileRefresh         # resume
 Unregister-ScheduledTask NaukriProfileRefresh     # remove
 ```
 
+## Job Auto-Apply
+
+Run the job auto-applier to automatically search and apply to relevant job postings matching your `.env` profile:
+
+```powershell
+npm run auto-apply
+```
+
+Or run in visible debug mode:
+
+```powershell
+node naukri-auto-apply.js visible
+```
+
+The auto-applier will:
+- Search jobs based on `CURRENT_ROLE`, `SKILLS`, and `LOCATION` in `.env`.
+- Skip external redirect sites and jobs you've already applied to.
+- Auto-fill application popups/questionnaires (Notice period, CTC, Experience, links) from `.env`.
+- Use `GEMINI_KEY` (if provided) to answer open-ended recruiter questions.
+- Log results to `naukri-apply.log`.
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -100,13 +122,15 @@ Unregister-ScheduledTask NaukriProfileRefresh     # remove
 
 | File | Purpose |
 |---|---|
-| `naukri-profile-refresh.js` | The refresh script |
-| `config.js` | Loads `.env` (no dependencies) |
+| `naukri-profile-refresh.js` | Profile refresh script (headline + resume file upload) |
+| `naukri-auto-apply.js` | Job search & auto-apply script |
+| `config.js` | Loads `.env` configuration |
 | `.env.example` | Template — copy to `.env` and fill in |
-| `naukri-refresh.log` | Run history (git-ignored) |
+| `naukri-refresh.log` | Refresh run history (git-ignored) |
+| `naukri-apply.log` | Job application history (git-ignored) |
 | `.naukri-chrome-profile/` | Saved Chrome session (git-ignored) |
 
 ## Disclaimer
 
-Automating your own profile may be against Naukri's Terms of Service. It only
-edits your own headline at a slow, human-like rate, but use at your own risk.
+Automating your own profile or applications may be against Naukri's Terms of Service. It runs at a slow, human-like rate, but use at your own risk.
+
